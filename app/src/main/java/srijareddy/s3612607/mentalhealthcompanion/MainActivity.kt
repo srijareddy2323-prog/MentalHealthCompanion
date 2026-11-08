@@ -1,5 +1,6 @@
 package srijareddy.s3612607.mentalhealthcompanion
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,197 +8,159 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.delay
-import srijareddy.s3612607.mentalhealthcompanion.ui.theme.BMICalculatorTheme
+import srijareddy.s3612607.mentalhealthcompanion.ui.theme.MentalHealthCompanion
 
 
 class MainActivity : ComponentActivity() {
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            BMICalculatorTheme {
 
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigationMain()
-                }
+        setContent {
+            MentalHealthCompanion {
+                MyAppScreens()
             }
         }
     }
 }
 
 @Composable
-fun AppNavigationMain() {
+fun MyAppScreens() {
 
     val navController = rememberNavController()
     val context = LocalContext.current
 
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route
+        startDestination = AppScreens.Splash.route
     ) {
-
-        composable(Screen.Splash.route) {
-            SplashScreen(
-                onNavigate = {
-                    if (UserDetails.getUserLoginStatus(context)) {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true }
-                        }
-                    } else {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true }
-                        }
-                    }
-                }
-            )
+        composable(AppScreens.Splash.route) {
+            HTStatusChecker(navController = navController)
         }
 
-        composable(Screen.Login.route) {
-            LoginScreen(
-                onLoginSuccess = {
 
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                },
-                onRegisterClick = {
-                    navController.navigate(Screen.Register.route)
-                }
-            )
+
+        composable(AppScreens.Login.route) {
+            EnterAppScreen(navController = navController)
         }
 
-        composable(Screen.Register.route) {
-            RegisterScreen(
-                onBackToLogin = {
-                    navController.popBackStack()
-                }
-            )
+        composable(AppScreens.Register.route) {
+            AccountRegisterScreen(navController = navController)
         }
 
-        composable(Screen.Home.route) {
-            HomeScreen(navController)
-        }
 
-        composable(Screen.BMICalculator.route) {
-            BMICalculatorScreen(onBack = {
-                navController.popBackStack()
-            })
-        }
-        composable(Screen.BMICategory.route) {
-            BMICategoryScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable(Screen.Profile.route) {
-            ProfileScreen(navController)
-        }
-        composable(Screen.About.route) {
-            AboutScreen(navController)
-        }
+
     }
 }
 
+
 @Composable
-fun SplashScreen(onNavigate: () -> Unit) {
+fun HTStatusChecker(navController: NavController) {
+
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         delay(3000)
-        onNavigate()
+
+
+            navController.navigate(AppScreens.Login.route) {
+                popUpTo(AppScreens.Splash.route) {
+                    inclusive = true
+                }
+            }
+
+
     }
 
-    SplashScreen()
-
-
+    HTSplashScreen()
 }
 
-
 @Composable
-fun SplashScreen() {
+fun HTSplashScreen() {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                color = Color(0xFF1976D2),
+                color = MaterialTheme.colorScheme.background,
             ),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Spacer(modifier = Modifier.weight(1f))
-
-
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = colorResource(id = R.color.white),
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
 
             Image(
+                painter = painterResource(id = R.drawable.app_icon),
+                contentDescription = null,
                 modifier = Modifier
-                    .size(70.dp),
-                painter = painterResource(id = R.drawable.bmi_logo),
-                contentDescription = "BMI Calculator"
-            )
-
-            Text(
-                text = "BMI Calculator App",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-            )
-
-            Text(
-                text = "By",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
-            )
-
-            Text(
-                text = "Jeevan Reddy",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                    .size(100.dp)
             )
 
         }
 
+        Spacer(modifier = Modifier.height(12.dp))
 
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = "Mental Health Companion",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
 
+            )
 
         Spacer(modifier = Modifier.weight(1f))
 
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = "Srija Reddy",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+
+            )
+
+        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(18.dp))
+
+
     }
+
 }
 
 @Preview(showBackground = true)
 @Composable
-fun SplashScreenPreview() {
-    SplashScreen()
+fun HTSplashScreenPreview() {
+    MentalHealthCompanion() {
+        HTSplashScreen()
+    }
 }
