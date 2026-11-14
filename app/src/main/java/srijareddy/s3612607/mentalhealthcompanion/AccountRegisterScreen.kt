@@ -18,9 +18,13 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -62,6 +66,8 @@ fun AccountRegisterScreen(navController: NavController) {
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
 
+    var userGender by remember { mutableStateOf("") }
+    var genderExpanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     Column(
@@ -149,6 +155,61 @@ fun AccountRegisterScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        ExposedDropdownMenuBox(
+            expanded = genderExpanded,
+            onExpandedChange = {
+                genderExpanded = !genderExpanded
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+        ) {
+            OutlinedTextField(
+                value = userGender,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = {
+                    Text("Select Gender")
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Gender Icon"
+                    )
+                },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = genderExpanded
+                    )
+                },
+                colors = textFieldColors,
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = genderExpanded,
+                onDismissRequest = {
+                    genderExpanded = false
+                }
+            ) {
+                listOf("Male", "Female", "Other", "Prefer not to say")
+                    .forEach { gender ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = gender)
+                            },
+                            onClick = {
+                                userGender = gender
+                                genderExpanded = false
+                            }
+                        )
+                    }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             modifier = Modifier
@@ -196,6 +257,11 @@ fun AccountRegisterScreen(navController: NavController) {
                     userAge.isEmpty() -> {
                         Toast.makeText(context, " Please Enter Age", Toast.LENGTH_SHORT).show()
                     }
+
+                    userGender.isEmpty() -> {
+                        Toast.makeText(context, "Please Select Gender", Toast.LENGTH_SHORT).show()
+                    }
+
 
                     userEmail.isEmpty() -> {
                         Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
