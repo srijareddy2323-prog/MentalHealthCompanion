@@ -1,6 +1,7 @@
 package srijareddy.s3612607.mentalhealthcompanion
 
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,7 +42,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.google.firebase.database.FirebaseDatabase
 import srijareddy.s3612607.mentalhealthcompanion.ui.theme.MentalHealthCompanion
+import kotlin.jvm.java
 
 @Preview(showBackground = true)
 @Composable
@@ -200,3 +203,50 @@ fun EnterAppScreen(navController: NavController) {
 
     }
 }
+
+
+fun loginUser(testerData: TesterData, context: Context, onLoginSuccess: () -> Unit) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference =
+        firebaseDatabase.getReference("UsersData").child(testerData.emailid.replace(".", ","))
+
+    databaseReference.get().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val dbData = task.result?.getValue(TesterData::class.java)
+            if (dbData != null) {
+                if (dbData.password == testerData.password) {
+
+//                    AppUserData.saveLoginStatus(context, true)
+//                    AppUserData.saveUserName(context, dbData.name)
+//                    AppUserData.saveUserEmail(context, dbData.emailid)
+
+                    onLoginSuccess.invoke()
+
+                } else {
+                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } else {
+                Toast.makeText(context, "Your account not found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+    }
+}
+
+
+data class TesterData(
+    var name : String = "",
+    var emailid : String = "",
+    var age : String = "",
+    var height : String = "",
+    var weight : String = "",
+    var password: String = ""
+)
