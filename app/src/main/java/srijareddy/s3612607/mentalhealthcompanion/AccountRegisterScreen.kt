@@ -1,6 +1,8 @@
 package srijareddy.s3612607.mentalhealthcompanion
 
 
+import android.R.attr.password
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,12 +43,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.google.firebase.database.FirebaseDatabase
 import srijareddy.s3612607.mentalhealthcompanion.ui.theme.MentalHealthCompanion
 
 
@@ -274,7 +278,25 @@ fun AccountRegisterScreen(navController: NavController) {
 
                     else -> {
 
-                        //register logic
+                        val accountData = AccountData(
+                            userName,
+                            userAge,
+                            userGender,
+                            userEmail,
+                            userPassword
+                        )
+                        registerUser(
+                            accountData,
+                            context,
+                            onRegistered = {
+
+                                navController.navigate(AppScreens.Login.route) {
+                                    popUpTo(AppScreens.Register.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             },
@@ -319,9 +341,42 @@ fun AccountRegisterScreen(navController: NavController) {
     }
 }
 
+fun registerUser(accountData: AccountData, context: Context, onRegistered: () -> Unit) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("RegisteredUsers")
+
+    databaseReference.child(accountData.email.replace(".", ","))
+        .setValue(accountData)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
+                    .show()
+
+                onRegistered.invoke()
+
+            } else {
+                Toast.makeText(
+                    context,
+                    "Registration Failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        .addOnFailureListener { _ ->
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+}
+
+
 data class AccountData(
     val fullname: String = "",
     val age: String = "",
+    val gender: String = "",
     val email: String = "",
     val password: String = ""
 )

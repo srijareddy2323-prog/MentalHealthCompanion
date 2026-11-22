@@ -162,7 +162,25 @@ fun EnterAppScreen(navController: NavController) {
                     else -> {
 
 
-                       //login logic
+                        val accountData = AccountData(
+                            "",
+                            "",
+                            "",
+                            userEmail,
+                            userPassword
+                        )
+                        loginUser(
+                            accountData,
+                            context,
+                            onLoginSuccess = {
+
+                                navController.navigate(AppScreens.Home.route) {
+                                    popUpTo(AppScreens.Login.route) {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
 
@@ -205,21 +223,20 @@ fun EnterAppScreen(navController: NavController) {
 }
 
 
-fun loginUser(testerData: TesterData, context: Context, onLoginSuccess: () -> Unit) {
+
+fun loginUser(accountData: AccountData, context: Context, onLoginSuccess: () -> Unit) {
 
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference =
-        firebaseDatabase.getReference("UsersData").child(testerData.emailid.replace(".", ","))
+        firebaseDatabase.getReference("RegisteredUsers").child(accountData.email.replace(".", ","))
 
     databaseReference.get().addOnCompleteListener { task ->
         if (task.isSuccessful) {
-            val dbData = task.result?.getValue(TesterData::class.java)
+            val dbData = task.result?.getValue(AccountData::class.java)
             if (dbData != null) {
-                if (dbData.password == testerData.password) {
+                if (dbData.password == accountData.password) {
 
-//                    AppUserData.saveLoginStatus(context, true)
-//                    AppUserData.saveUserName(context, dbData.name)
-//                    AppUserData.saveUserEmail(context, dbData.emailid)
+                    Toast.makeText(context, "Login Sucessfull", Toast.LENGTH_SHORT).show()
 
                     onLoginSuccess.invoke()
 
@@ -240,13 +257,3 @@ fun loginUser(testerData: TesterData, context: Context, onLoginSuccess: () -> Un
 
     }
 }
-
-
-data class TesterData(
-    var name : String = "",
-    var emailid : String = "",
-    var age : String = "",
-    var height : String = "",
-    var weight : String = "",
-    var password: String = ""
-)

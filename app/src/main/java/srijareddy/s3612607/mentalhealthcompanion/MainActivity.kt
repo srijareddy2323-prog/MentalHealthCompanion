@@ -66,14 +66,16 @@ fun MyAppScreens() {
             HTStatusChecker(navController = navController)
         }
 
-
-
         composable(AppScreens.Login.route) {
             EnterAppScreen(navController = navController)
         }
 
         composable(AppScreens.Register.route) {
             AccountRegisterScreen(navController = navController)
+        }
+
+        composable(AppScreens.Home.route) {
+            UserHomeScreen()
         }
 
 
